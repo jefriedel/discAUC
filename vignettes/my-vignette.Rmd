@@ -81,7 +81,7 @@ DD_med_indiff
 PD_med_indiff
 ```
 
-If the data are in a tidy format, AUC can be calculated simply by supplying the data to the `AUC` function and entering the necessary parameters. Several parts of the function are looking for the variable names in the data that indicate the relevant data. The variable names should be entered within quotes (`"prop_indiff"` instead of `prop_indiff`). The `x_axis` is the delay/social distance/likelihood of receiving the outcome. The `amount` must be set manually because it is possible that an indifference point with the maximum value (amount of the larger outome) does not exist in the data. The `grouping` factor is designed to aid in calculating AUC across a whole data set at once (see below). At this time a `grouping` factor must be included, even if there is only *one* set of indifference points being used to calculate AUC.
+If the data are in a tidy format, AUC can be calculated simply by supplying the data to the `AUC` function and entering the necessary parameters. Several parts of the function are looking for the variable names in the data that indicate the relevant data. The variable names should be entered within quotes (`"prop_indiff"` instead of `prop_indiff`). The `x_axis` is the delay/social distance/likelihood of receiving the outcome. The `amount` must be set manually because it is possible that an indifference point with the maximum value (amount of the larger outcome) does not exist in the data. The `grouping` factor is designed to aid in calculating AUC across a whole data set at once (see below). At this time a `grouping` factor must be included, even if there is only *one* set of indifference points being used to calculate AUC.
 
 ```{r DD_simple}
 AUC(dat = DD_med_indiff,
@@ -157,7 +157,7 @@ AUC(dat = PD_med_indiff,
 
 ## Calculating AUC for larger data sets
 
-A single data set might have several sets of indifference points. The example data sets include indifference one set of indifference points per outcome for each participant. Instead of calculating AUC one-by-one for each specific set, AUC can be calculated *en masse* for all of the sets of indifference points. To use the *en masse* AUC calculations, you need to set the variables that can be used to idenfity each specific set of indifference points in the `groupings` factor. The column names should be entered within quotes.
+A single data set might have several sets of indifference points. The example data sets include indifference one set of indifference points per outcome for each participant. Instead of calculating AUC one-by-one for each specific set, AUC can be calculated *en masse* for all of the sets of indifference points. To use the *en masse* AUC calculations, you need to set the variables that can be used to identify each specific set of indifference points in the `groupings` factor. The column names should be entered within quotes.
 
 ```{r one_factor_groups}
 #For demonstration, filter for median indifference points for all outcomes.

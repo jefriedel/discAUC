@@ -5,7 +5,7 @@
 #' @param x_axis Delays/probabilities/social distance variable in \code{dat}
 #' @param prob_disc Boolean for whether data are probability discounting
 #' @param max_x_axis Numeric; Maximum possible value in \code{x_axis}
-#' @param amount Numeric; Maximum amount of indifference points. (A in disocunting models.)
+#' @param amount Numeric; Maximum amount of indifference points. (A in discounting models.)
 #' @param groupings Variables for grouping (e.g., subject, experimental group)
 #' as a character or vector of characters
 #' @param imp_zero Boolean for whether indifference points at \code{x_axis = 0} (e.g., delay = 0, odds against = 0, etc.) should be added to the data.

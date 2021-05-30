@@ -9,7 +9,7 @@ Description: Area under the curve (AUC; Myerson et al., 2001) is a popular measu
   However, this practice is not clearly followed. This imputed zero-delay indifference
   point plays an important role in log and ordinal versions of AUC.
   Ordinal and log versions of AUC are described by Borges et al. (2016). The package
-  can calculats all three versions of AUC [and includes a new version: IHS(AUC)],
+  can calculates all three versions of AUC [and includes a new version: IHS(AUC)],
   impute indifference points when x = 0, calculate ordinal AUC in the case of Halton
   sampling of x-values, and account for probability discounting AUC.
 Version: 0.4.0
