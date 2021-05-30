@@ -11,3 +11,5 @@ desktop.ini
 ^\.csv$
 cran-comments.md
 ^\.travis\.yml$
+News.md
+^CRAN-RELEASE$

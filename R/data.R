@@ -22,7 +22,7 @@
 #'   outcome. The maximum amount was the number of servings of each outcome
 #'   worth $100.}
 #' }
-#' @source \url{https://doi.org/10.1002/jeab.623}
+#' @source \doi{10.1002/jeab.623}
 "examp_DD"
 
 #' Probability discounting data
@@ -48,5 +48,5 @@
 #'   outcome. The maximum amount was the number of servings of each outcome
 #'   worth $100.}
 #' }
-#' @source \url{https://doi.org/10.1002/jeab.623}
+#' @source \doi{10.1002/jeab.623}
 "examp_PD"

@@ -1,6 +1,6 @@
 Package: discAUC
 Type: Package
-Title: discAUC: AUC for delay discounting data, as well as ordinal, log, and IHS versions
+Title: discAUC: AUC for Delay Discounting Data, as Well as Ordinal, Log, and IHS Versions
 Description: Area under the curve (AUC; Myerson et al., 2001) is a popular measure used
   in discounting research. Although the calculation of AUC is standardized,
   there are differences in AUC based on some assumptions. For example, Myerson et al.

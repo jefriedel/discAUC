@@ -20,7 +20,7 @@ A data frame with 360 rows and 4 variables:
 }
 }
 \source{
-\url{https://doi.org/10.1002/jeab.623}
+\doi{10.1002/jeab.623}
 }
 \usage{
 examp_DD

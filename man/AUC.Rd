@@ -28,7 +28,7 @@ AUC(
 
 \item{max_x_axis}{Numeric; Maximum possible value in \code{x_axis}}
 
-\item{amount}{Numeric; Maximum amount of indifference points. (A in disocunting models.)}
+\item{amount}{Numeric; Maximum amount of indifference points. (A in discounting models.)}
 
 \item{groupings}{Variables for grouping (e.g., subject, experimental group)
 as a character or vector of characters}

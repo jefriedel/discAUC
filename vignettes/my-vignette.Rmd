@@ -42,7 +42,7 @@ library(discAUC)
 library(dplyr)
 ```
 
-The one major assumption of this package is that discounting data are **Tidy**. The principles of tidy data are outlined by [Wickham (2014)](Journal%20of%20statistical%20software,%202014). To overly simplify, the discounting data should be organized in a long-format in which there is only one indifference point per row of data. All of the pertinent information for that indifference point (e.g., subject/participant identifier, condition, delay, etc.) should be organized in different columns of the data. Two example data sets are included with the package that demonstrate the expected data format and can be used to test the package.
+The one major assumption of this package is that discounting data are **Tidy**. The principles of tidy data are outlined by [Wickham (2014)](https://doi.org/10.18637/jss.v059.i10). To overly simplify, the discounting data should be organized in a long-format in which there is only one indifference point per row of data. All of the pertinent information for that indifference point (e.g., subject/participant identifier, condition, delay, etc.) should be organized in different columns of the data. Two example data sets are included with the package that demonstrate the expected data format and can be used to test the package.
 
 ```{r}
 #Example Tidy Delay Discounting Data
