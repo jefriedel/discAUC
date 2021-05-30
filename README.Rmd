@@ -1,0 +1,46 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# discAUC
+
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.com/jefriedel/discAUC.svg?branch=master)](https://travis-ci.com/jefriedel/discAUC)
+<!-- badges: end -->
+
+The goal of discAUC is to provide a solution to easily calculate AUC for delay
+discounting data. It includes logAUC and ordAUC as published in Borges et al. 
+(2016). It also includes a solution for 0 delays for logAUC.
+
+## Installation
+
+You can install the released version of discAUC from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("discAUC")
+```
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(discAUC)
+
+#Calculate AUC for proportional indiference points for each outcome per subject.
+AUC(dat = examp_DD,
+    x_axis = "delay_months",
+    indiff = "prop_indiff",
+    amount = 1,
+    groupings = c("subject","outcome"))
+```
+

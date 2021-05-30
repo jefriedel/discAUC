@@ -1,0 +1,511 @@
+---
+title: "Using the discAUC package"
+author: "Jonathan E. Friedel"
+date: "`r format(Sys.time(), '%Y %B, %d')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+The `discAUC` package was written to be a generic method to calculate various forms of area under the curve (AUC) for discounting data. The original formulation of AUC for discounting data was [Myerson et al. (2001)](https://doi.org/10.1901/jeab.2001.76-235) and the formulations for AUClog and AUCord are described in [Borges et al. (2016)](https://doi.org/10.1002/jeab.219). The point of this package is not to provide *a better way* to calculate AUC, rather it is to standardize the calculations. The goals of this package are to:
+
+1.  Have a single function (`AUC`) to calculate AUC.
+
+2.  Have a function to easily convert probability discounting for `AUC`.
+
+    -   As is the standard practice, AUC for probability discounting requires converting the likelihood of receiving the outcome to the odds against receiving the outcome.
+
+3.  Have a function to easily prepare discounting data to calculate AUCord.
+
+4.  Have a function to easily prepare discounting data to calculate AUClog.
+
+5.  Have a function that will impute missing indifference points when delay/social distance/odds against receiving the outcome/etc. are equal to zero.
+
+# Loading the Package and Setting up Data
+
+```{r setup, warning = FALSE, message = FALSE}
+#Load discounting AUC package
+library(discAUC)
+
+#Load dplyr, which aids in data manipulation
+library(dplyr)
+```
+
+The one major assumption of this package is that discounting data are **Tidy**. The principles of tidy data are outlined by [Wickham (2014)](Journal%20of%20statistical%20software,%202014). To overly simplify, the discounting data should be organized in a long-format in which there is only one indifference point per row of data. All of the pertinent information for that indifference point (e.g., subject/participant identifier, condition, delay, etc.) should be organized in different columns of the data. Two example data sets are included with the package that demonstrate the expected data format and can be used to test the package.
+
+```{r}
+#Example Tidy Delay Discounting Data
+examp_DD
+```
+
+The indifference points are the last column in this example data set ("prop_indiff"). For each indifference point the subject number, delay to receiving the indifference point, and the type of outcome being discounted are all labeled in different columns. The tidy format allows for easier data manipulation and organization. For example, if you only wanted to calculate AUC for a specific subject or for a specific set of conditions then you filter the data based on the variables of interest.
+
+```{r filter_examples}
+#Filter example DD data by subject (relies on dplyr library)
+examp_DD %>%
+  filter(subject == 103)
+
+#Filter example DD data by outcome type
+examp_DD %>%
+  filter(outcome=="alcohol")
+```
+
+# Calculating AUC
+
+For the initial demonstrations, we will use the median indifference points for money to show the calculations for AUC. We will obtain the median indifference points for both delay discounting (DD) and probability discounting (PD).
+
+```{r med_indiff}
+#Subject -987.987 are precalculated median indifference points for each outcome.
+DD_med_indiff = examp_DD %>%
+                filter(subject == -987.987,
+                outcome == "$100 Gain")
+
+PD_med_indiff = examp_PD %>%
+                filter(subject == -987.987,
+                outcome == "$100 Gain")
+
+#Note that the median indifference point subject number (-987.987) is truncated in the output.
+DD_med_indiff
+
+PD_med_indiff
+```
+
+If the data are in a tidy format, AUC can be calculated simply by supplying the data to the `AUC` function and entering the necessary parameters. Several parts of the function are looking for the variable names in the data that indicate the relevant data. The variable names should be entered within quotes (`"prop_indiff"` instead of `prop_indiff`). The `x_axis` is the delay/social distance/likelihood of receiving the outcome. The `amount` must be set manually because it is possible that an indifference point with the maximum value (amount of the larger outome) does not exist in the data. The `grouping` factor is designed to aid in calculating AUC across a whole data set at once (see below). At this time a `grouping` factor must be included, even if there is only *one* set of indifference points being used to calculate AUC.
+
+```{r DD_simple}
+AUC(dat = DD_med_indiff,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = "subject")
+```
+
+To calculate probability discounting, set the flag of `prob_disc = TRUE.` The function will convert all of the likelihoods (`prob`) to odds against receiving the outcome. AUC will then be calculated based on the odds against receiving the outcome. Note, that the output will not clearly indicate that you calculated AUC for probability discounting data because the function only returns AUC values.
+
+```{r PD_simple}
+AUC(dat = PD_med_indiff,
+    indiff = "prop_indiff",
+    x_axis = "prob",
+    amount = 1,
+    grouping = "subject",
+    prob_disc = TRUE)
+```
+
+## Different Versions of AUC
+
+[Borges et al. (2016)](https://doi.org/10.1002/jeab.219) outlined two alternative methods for calculating AUC. AUClog simply transforms the `x_axis` values and calculates AUC based on the transformed values. AUCord transforms the `x_axis` values into their ordinal position and calculates AUC based on the ordinal position.
+
+### Calculating AUC*ord*
+
+We will describe calculating AUCord first because it can be done simply by changing the type of AUC in the function. Specifically, `type = "ordinal"`
+
+```{r AUCord}
+#Ordinal AUC for DD data
+AUC(dat = DD_med_indiff,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = "subject",
+    type = "ordinal")
+
+#Ordinal AUC for PD data
+AUC(dat = PD_med_indiff,
+    indiff = "prop_indiff",
+    x_axis = "prob",
+    amount = 1,
+    groupings = "subject",
+    prob_disc = TRUE,
+    type = "ordinal")
+```
+
+*Note on the order of operations*: When calculating AUCord for probability discounting data, the AUC function will obtain the odds against and then calculate the ordinal values based on the odds against.
+
+### Calculating AUC*log*
+
+Calculating AUClog with the AUC function is also relatively simple. However, in addition to setting the `type = "log"` you can also specify the base of the logarithm you wish to use. By default, the function uses a base of 2. The AUC function uses an adjustment procedure (based on the average distance between log transformed values) to account for when the x_axis value equals 0. See below for a full description of the correction types.
+
+```{r AUClog}
+#Ordinal AUC for DD data
+AUC(dat = DD_med_indiff,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = "subject",
+    type = "log")
+
+#Ordinal AUC for PD data with log base 10
+AUC(dat = PD_med_indiff,
+    indiff = "prop_indiff",
+    x_axis = "prob",
+    amount = 1,
+    groupings = "subject",
+    prob_disc = TRUE,
+    type = "log",
+    log_base = 10)
+```
+
+## Calculating AUC for larger data sets
+
+A single data set might have several sets of indifference points. The example data sets include indifference one set of indifference points per outcome for each participant. Instead of calculating AUC one-by-one for each specific set, AUC can be calculated *en masse* for all of the sets of indifference points. To use the *en masse* AUC calculations, you need to set the variables that can be used to idenfity each specific set of indifference points in the `groupings` factor. The column names should be entered within quotes.
+
+```{r one_factor_groups}
+#For demonstration, filter for median indifference points for all outcomes.
+DD_med_outcomes = examp_DD %>%
+              filter(subject == -987.987)
+
+#Simple AUC
+AUC(dat = DD_med_outcomes,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = "outcome")
+```
+
+For this example, we simplified the example data to the median indifference points for each outcome. We added `grouping = "outcome"` to indicate that the function should return an AUC value for each outcome in the median indifference point data set. The `AUC` returns a different AUC value for each level in the "grouping" factor.
+
+The grouping function can handle more than one variable at a time by using the combine function `c()` on the left hand side of the `grouping =` in the `AUC` function. The columns that should be used to identify the independent the sets of indifference points should be entered as `c("variable1", "variable2", "variable3", etc.)`. In the following example, AUC is calculated for each outcome by subject.
+
+```{r mult_grouping}
+#AUC by outcome and subject
+AUC(dat = examp_DD,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = c("outcome", "subject"))
+
+```
+
+The order of the `grouping` variable does not change the resulting AUC data, only the order in which the columns are returned.
+
+```{r mult_grouping2}
+#AUC by outcome and subject
+AUC(dat = examp_DD,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = c("outcome", "subject"))
+
+#AUC by subject and outcome
+AUC(dat = examp_DD,
+    indiff = "prop_indiff",
+    x_axis = "delay_months",
+    amount = 1,
+    grouping = c("subject", "outcome"))
+```
+
+# Finer Control of AUC calculations
+
+If you are calculating probability discounting, AUClog, or AUCord, technically the `AUC()` function does not transform you `x_axis` values. The AUC only uses the default AUC equation as described by [Myerson et al. (2001)](https://doi.org/10.1901/jeab.2001.76-235). That is AUC is the sum of all the trapezoid area between successive indifference points. A single trapezoid has an area of,
+
+$$
+(x_2 -x_1)*\frac{y_1+y_2}{2}
+$$
+
+where the *x* values are the successive delays, social distances, odds against, etc. and the *y* values are the successive indifference points. The *x* values are all standardized by the maximum delay, social distance, odds against, etc. The *y* values are all standardized by the amount of the larger outcome.
+
+Within the `discAUC` package are separate functions that calculate the transformations on the indifference points supplied to the `AUC()` function. The `AUC()` function calls those specific transformation functions and then uses the transformed data in the above formula. In other words, there are no special versions of the above formula like,
+
+$$
+[log(x_2) -log(x_1)]*\frac{y_1+y_2}{2}
+$$
+
+rather, each transformation is conducted and then fed back into the original formulation of AUC.
+
+Each of the specific transformation functions can be called on their own. Using the functions prior to the AUC function is useful if you would like fine control of all of the pieces of the AUC calculation or you would like to inspect the transformed data prior to the AUC calculation.
+
+## AUC_zeros()
+
+[Myerson et al. (2001)](https://doi.org/10.1901/jeab.2001.76-235) call for including an indifference point when the x_axis value = 0. If an experimental assessment of the indifference point at X = 0 was not obtained then the value should be added. If the indifference points need to be added, the value of each added indifference should be equal to the larger outcome (i.e., *A* from a discounting model*)*.
+
+The `AUC_zeros` function will add zeros to a tidy set of indifference points. The function will only add the indifference points at X = 0 if they did not already exist in the data. Additionally, a new column will be added to the data file that will indicate which indifference points were originally included and which indifference points were added by the function.
+
+```{r AUC_zeros}
+#Examp_DD data did not include indifference points when delay = 0
+AUC_zeros(dat = examp_DD,
+          indiff = "prop_indiff",
+          x_axis = "delay_months",
+          amount = 1,
+          groupings = c("subject","outcome"))
+```
+
+With probability discounting, the odds against values will be in the opposite order of the likelihoods of receiving the outcome. For that reason, if the data are probability discounting data you must indicate that `prob_disc = TRUE` in the function call. This will impute an indifference point with a likelihood of occurring of 100%. With a likelihood of 100% the odds against receiving that outcome will be converted to 0.
+
+```{r AUC_zeros_prob}
+#Examp_PD data did not include indifference points when prob = 1
+AUC_zeros(dat = examp_PD,
+          indiff = "prop_indiff",
+          x_axis = "prob",
+          amount = 1,
+          groupings = c("subject","outcome"),
+          prob_disc = TRUE
+          )
+```
+
+## prep_odds_against()
+
+With the `prep_odds_against()` function, you can indicate the `x_axis` variable and the function will calculate the odds against receiving the outcome. Odds against is the typical form for displaying probability discounting because the value of the outcome will decrease as the odds against receiving the outcome increase. The formula for calculating the odds against is
+
+$$
+\frac{1-p}{p}
+$$
+
+where *p* is the probability of receiving the outcome.
+
+```{r odds_against}
+
+#Make sure to indicate groupings, if necessary
+prep_odds_against(dat = examp_PD,
+                  x_axis = "prob",
+                  groupings = c("subject","outcome"))
+
+```
+
+The odds against will be added as a new variable in the data set. The name of the variable will be the name of the original probability variable ("prob" in this case) with "\_against" added afterwards. For the `examp_PD` data set, the odds against will be included as `prob_against`. Indicating the indifference points in this function is unnecessary, because it only transforms the probability of receiving the outcomes.
+
+## prep_ordinal()
+
+The `prep_ordinal()` function behaves very similarly to `prep_odds_against()`. `prep_ordinal()` transforms the `x_axis` values into the ordinal position. Note that if there are indifference points for when the x_axis = 0, the ordinal value will be calculated as 0.
+
+```{r prep_ordinals}
+
+#Groupings must be specified, if necessary
+prep_ordinal(dat = examp_DD,
+             x_axis = "delay_months",
+             groupings = c("subject","outcome"))
+```
+
+The ordinals will be added as a new variable in the data set. The name of the variable will be the name of the original probability variable ("delay_months" in this case) with "\_ord" added afterwards. For the `examp_DD` data set, the odds against will be included as `delay_months_ord`.
+
+If ordinal values are desired for probability discounting data, then the `prob_disc = TRUE` flag must be set. For probability discounting, the ordinal values will be calculated in reverse order to match taking ordinal values of the odds against receiving the outcome. In other words, for delay discounting ordinal position of a delay **increases** as delay **increases** but for probability typically we want ordinal value **increasing** as the probability **decreases**.
+
+```{r prep_ordinals_prob}
+
+prep_ordinal(dat = examp_PD,
+             x_axis = "prob",
+             groupings = c("subject","outcome"),
+             prob_disc = TRUE)
+
+```
+
+## prep_ordinals_all()
+
+`prep_ordinal_all()` is currently included to account for situations in which participants experience different x_axis values. For example, indifference points might be obtained for participant 1 at 1 week, 1 month, and 6 months and for participant 2 at 1 week, 3 months, and 1 year. In such a case, it would not be appropriate to label the ordinals as 1, 2, and 3 for the respective subjects. [Young (2016)](https://doi.org/10.1016/j.beproc.2015.09.009) has proposed using a Halton sequence to measure discounting, but to my knowledge this technique has not be used. In a Halton sequence, a vast number of x_axis values would be used to provide a more accurate picture of the global discounting curve.
+
+To account for this sort of situation, the `prep_ordinal_all()` function calculates the ordinal value for each x_axis value based on the respective ordinal position in the list of all x_axis values not just the ordinal position of values for a specific subject.
+
+As there is currently limited utility for this technique, an example data set is not included in the package and must be created
+
+```{r prep_ordinal_all_create_data}
+
+#Create data based on values included in above example
+examp_ord_all = 
+  tibble(
+    sub = c(1, 1, 1, 2, 2, 2),
+    delay_weeks = c(1, 4, 26, 1, 13, 52)
+    )
+
+#Groupings are not necessary
+prep_ordinal_all(dat = examp_ord_all,
+                 x_axis = "delay_weeks")
+```
+
+As with `prep_ordinal()`, if the data are from probability discounting then `prep_ordinal_all()` will reverse order the ordinal values.
+
+## prep_log()
+
+### Accounting for log(0)
+
+When log transforming any values, a common concern is how to account for `log(0)` which is undefined.
+
+#### Adding a correction factor
+
+A common recommendation is to add a constant value (e.g., 1) to all values in the data set and transform the "corrected" values. One limitation of just using correction factor can change the relative distances between the log transformed `x_axis` values (those relative distances being the whole point of the log transformation in the first place).
+
+```{r log_corr}
+
+prep_log_AUC(dat = examp_DD,
+             x_axis = "delay_months",
+             type = "corr")
+```
+
+The correction factor can be specified by setting `correction` to the desired value.
+
+```{r log_corr_2}
+
+prep_log_AUC(dat = examp_DD,
+             x_axis = "delay_months",
+             type = "corr",
+             correction = .25)
+```
+
+An additional problem that will crop up when calculating log transformed x_axis values is that you will have negative log(X) values, which is problematic for the standard method for calculating AUC. The following method for correcting log transformed x_axis values accounts for the negative log(X) values.
+
+#### Adjusting log transformed values
+
+Included in this package is a method for correcting log(0) values that is referred to as "adjust." The adjust method calculates the mean distance between each successive log transformed x_axis value, forces log(0) = 0, and then add the mean log distance to the log transformed indifference points. Essentially, the adjust procedure uses a correction factor that will shift the indifference points upwards without changing the underlying distribution of the data. Specifically,
+
+$$
+\kappa = \frac{\sum_{n=1}^{N-1} (\log(X_{n+1}) - \log(X_{n}))}{N}
+$$
+
+and
+
+$$
+X_{logtrans} = \log(X_{old}) + \kappa
+$$
+
+The following code block demonstrates the calculations for adjustment correction.
+
+```{r log_adjust_transformed values}
+
+#Initial vector with delays (in weeks)
+delays = c(0, 0.25, 1, 4, 26)
+
+#Log transform delays
+log_delays = log(delays, base = 2)
+
+#Display values
+log_delays
+
+#Eliminate log(0) = -Inf
+non_zero_log = log_delays[-1]
+
+#Calculate the difference between succesive non-zero indifference points
+log_diff = diff(non_zero_log)
+
+#Print log_diff
+log_diff
+
+#Adjustment factor
+adjustment = mean(log_diff)
+
+#Adjust log delays
+new_log_delays = log_delays + adjustment
+
+#Set log(0) = 0
+new_log_delays[1] = 0
+
+#Print adjusted log delays
+new_log_delays
+
+```
+
+Additionally, the adjust method includes an automated correction for x_axis values that are between 0 and 1. The AUC formula assumes that the lowest x_axis value is 0. However, if an x_axis value is between 0 and 1 (for example 1 week will be expressed as 0.25 if the delays are expressed as months) then the log transformed x_axis value will be negative. The negative x_axis values will introduce errors to the AUC calculations. One solution is to express all indifference points in the lowest possible unit (weeks instead of months, days instead of weeks, etc.). The solution this package uses is to increase all of the log transformed x_axis values by the absolute value of the minimum log transformed x_axis value. Specifically,
+
+$$
+X_{logtrans} = \log(X_{old}) + \log(\min(X))
+$$
+
+is the formula for correcting for negative log transformed x_axis values.
+
+In total, the final logs transformed X values can be found with the formula,
+
+$$
+X_{logtrans} = \log(X_{old}) + \kappa + \log(\min(X))
+$$
+
+This adjustment procedure is the default method the AUC function uses is an "adjustment" to all of the log transformed values.
+
+The following code block gives an example of the `"adjust"` method for log AUC.
+
+```{r log_adjust}
+
+#Default adjust method
+prep_log_AUC(dat = examp_DD,
+             x_axis = "delay_months",
+             type = "adjust")
+```
+
+If the adjust method is still desired with out the decimal correction, set `dec_offset = FALSE`.
+
+```{r log_adjust_no_dec}
+
+#Log adjust method with no decimal correction
+prep_log_AUC(dat = examp_DD,
+             x_axis = "delay_months",
+             type = "adjust",
+             dec_offset = FALSE)
+```
+
+#### Inverse Hyperbolic Sine Transformation (IHS)
+
+The final method for log transformation is not strictly a log transformation. [Gilroy et al. (2021)](https://doi.org/10.1002/jeab.679) proposed using the IHS transformation to aid in conduct demand analyses. Specifically, IHS was proposed to handle consumption values obtained from hypothetical purchase tasks and the associated problems of log transforming zero consumption values. I highly recommend reading their description of the IHS transformation. The first main benefit of the IHS transformation is that $\mathrm{IHS}(0) = 0$. The second benefit of IHS is that it produces values that are generally similar to log transformed values (i.e., a high degree of correlation).
+
+Specifically,
+
+$$
+\mathrm{IHS}(X) = \sinh^{-1}{ X} = \mathrm{arsinh } (X)
+$$
+
+and the specific calculations for a single value are
+
+$$
+\mathrm{IHS}(X) = \ln{(X + \sqrt{X^2 + 1})}
+$$
+
+```{r log_IHS}
+
+#IHS transformation
+prep_log_AUC(dat = examp_DD,
+             x_axis = "delay_months",
+             type = "IHS")
+```
+
+# Combining Finer Control Functions
+
+The functions described above can be used in a successive fashion. For example, when obtaining AUClog for probability discounting: first, probabilities of receiving an outcome should be converted to odds against and then second, log transformations should be performed on odds against values.
+
+The main factor to account for when feeding the results from one function to the next function is that the `x_axis` value of interest changes after transformations have been transformed. Following the above example, we transform probability values into odds against values. For the log transformation, we want to treat the odds against values as the x_axis of interest.
+
+```{r combinations}
+
+#Calculate odds against
+examp_PD_odds = prep_odds_against(dat = examp_PD,
+                  x_axis = "prob",
+                  groupings = c("subject","outcome"))
+
+#Print odds against
+examp_PD_odds
+
+#Add zeros, but already converted to odds against so prob_disc = FALSE
+#Note the x_axis value was changed to "prob_against" which was the newly added column
+examp_PD_odds = AUC_zeros(dat = examp_PD_odds,
+          x_axis = "prob_against",
+          indiff = "prop_indiff",
+          amount = 1,
+          groupings = c("subject","outcome"),
+          prob_disc = FALSE)
+
+#Print odds agianst with zeros
+examp_PD_odds
+
+#Odds against to log_odds against.
+#Note the x_axis value was changed to "prob_against" which was the newly added column
+examp_PD_log_odds = prep_log_AUC(dat = examp_PD_odds,
+                                 x_axis = "prob_against",
+                                 type = "adjust")
+
+examp_PD_log_odds
+```
+
+Finally, when using the completely transformed data, simply supply it to the AUC function.
+
+```{r auc}
+
+AUC(dat = examp_PD_log_odds,
+    indiff = "prop_indiff",
+    x_axis = "log_prob_against",
+    amount = 1,
+    groupings = c("subject","outcome"))
+```

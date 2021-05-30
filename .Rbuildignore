@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^desktop\.ini$
+^AUC_prep_checks\.R$
+^ECig input\.csv$
+desktop.ini
+[.].csv
+^\.data/ECig input\.csv$
+^\.csv$
+cran-comments.md
+^\.travis\.yml$
