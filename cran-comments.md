@@ -1,5 +1,11 @@
 ## Resubmission
 
+-   Requested Changes for Manual Checks (part 2)
+
+    -   Removed spaces from \<DOI:\> indicators
+
+    -   Added DOI for Borges et al.
+
 -   Requested Changes for Manual Checks
 
     -   Removed package name from title
