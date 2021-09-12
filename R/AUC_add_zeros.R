@@ -99,9 +99,10 @@ AUC_zeros <- function(dat,
     dplyr::select(dplyr::all_of((groupings))) %>% # select only the grouping values
     dplyr::mutate({{ x_axis }} := base::ifelse(prob_disc, 1, 0), # Set x_axis
       {{ indiff }} := amount, # Set indifference point to Amount
-      orig = FALSE
-    ) %>% # Set flag that the data was imputed so that users
-    # are not confused by the imputed data
+      orig = FALSE # Set flag that the data was imputed so that users
+                   # are not confused by the imputed data
+    ) %>% 
+    
     dplyr::bind_rows(dat) %>% # Add zero data back into original file
     dplyr::group_by_at(dplyr::vars(dplyr::one_of(groupings)))
 
