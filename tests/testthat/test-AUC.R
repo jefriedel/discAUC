@@ -231,3 +231,94 @@ test_that("AUC calcs are correct", {
   expect_equal(ord_AUC, ord_AUC_manual)
   expect_equal(log_AUC, log_AUC_manual)
 })
+
+test_that("AUC of single tibble works",
+  {
+    test_dat <- dplyr::tibble(
+      delay = base::rep(base::c(1 / 7, 1, 2, 4, 26, 52), 3),
+      indiff = base::c(
+        base::rep(100, 6),
+        base::rep(0, 6),
+        c(95, 75, 50, 20, 5, 1)
+      ),
+      sub = base::c(
+        base::rep("Max", 6),
+        base::rep("Zero", 6),
+        base::rep("Reg", 6)
+      )
+    )
+    
+    expect_equal(
+      AUC(dat = test_dat %>% filter(sub == "Reg"),
+        indiff = "indiff",
+        x_axis = "delay",
+        amount = 100) %>%
+      pull(AUC),
+      0.1100549, #Value determined when original test was build
+      tolerance = 10^-7) 
+    
+    expect_equal(
+      AUC(dat = test_dat %>% filter(sub == "Zero"),
+          indiff = "indiff",
+          x_axis = "delay",
+          amount = 100) %>%
+        pull(AUC),
+      0.001373626, #Value determined when original test was build
+      tolerance = 10^-7) 
+    
+    expect_equal(
+      AUC(dat = test_dat %>% filter(sub == "Max"),
+          indiff = "indiff",
+          x_axis = "delay",
+          amount = 100) %>%
+        pull(AUC),
+      1, #Value determined when original test was build
+      tolerance = 10^-7) 
+    
+    expect_equal(
+      AUC(dat = test_dat %>% filter(sub == "Max"),
+          indiff = "indiff",
+          x_axis = "delay",
+          amount = 100,
+          imp_zero = FALSE) %>%
+        pull(AUC),
+      0.9972527, #Value determined when original test was build
+      tolerance = 10^-7)
+    
+    expect_equal(
+      AUC(dat = test_dat %>% filter(sub == "Reg"),
+          indiff = "indiff",
+          x_axis = "delay",
+          amount = 100,
+          type = "ord") %>%
+        pull(AUC),
+      0.4925, #Value determined when original test was build
+      tolerance = 10^-7) 
+    
+    expect_equal(
+      AUC(dat = test_dat %>% filter(sub == "Reg"),
+          indiff = "indiff",
+          x_axis = "delay",
+          amount = 100,
+          type = "log") %>%
+        pull(AUC),
+      0.5277344, #Value determined when original test was build
+      tolerance = 10^-7)
+
+
+    expect_equal( 
+    AUC(dat = test_dat %>%
+            filter(sub == "Reg") %>% 
+            bind_cols(
+              tibble(prob = c(0.95,.85,.5,.1,.01,0.001))
+            ),
+        indiff = "indiff",
+        x_axis = "prob",
+        amount = 100,
+        prob_disc = TRUE) %>%
+      pull(AUC),
+    0.04176305, #Value determined when original test was build
+    tolerance = 10^-7)
+    
+            
+  })

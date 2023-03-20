@@ -15,10 +15,6 @@ knitr::opts_chunk$set(
 
 # discAUC
 
-<!-- badges: start -->
-[![Travis build status](https://travis-ci.com/jefriedel/discAUC.svg?branch=master)](https://travis-ci.com/jefriedel/discAUC)
-<!-- badges: end -->
-
 The goal of discAUC is to provide a solution to easily calculate AUC for delay
 discounting data. It includes logAUC and ordAUC as published in Borges et al. 
 (2016). It also includes a solution for 0 delays for logAUC.

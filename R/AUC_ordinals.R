@@ -57,6 +57,8 @@ prep_ordinal_all <- function(dat,
     # }
   } # Checks
 
+
+  
   # For probability discounting, create ordinal on descending probabilities
 
   # Changed from symbols to strings through rlang
@@ -94,7 +96,8 @@ prep_ordinal_all <- function(dat,
   }
 
   dat <- dat %>%
-    dplyr::left_join(ord_tibble)
+    dplyr::left_join(ord_tibble,
+                     by = {{x_axis}})
 
   base::return(dat)
 }
@@ -152,6 +155,7 @@ prep_ordinal <- function(dat,
                          x_axis,
                          groupings = NULL,
                          prob_disc = FALSE) {
+  
   {    if (!tibble::is_tibble(dat)) {
     base::stop("dat must be a tibble")
   }
@@ -169,11 +173,28 @@ prep_ordinal <- function(dat,
     base::stop("groupings must be a character or vector of characters for column names")
   }  } # Checks
 
+  orig_group = TRUE
+  
+  #Clear no visibile binding note
+  fake_grouping <- NULL
+  
+  #Handling no grouping factor
+  if(is.null(groupings)){
+    
+    dat <- dat %>%
+      dplyr::mutate(fake_grouping = 1)
+    
+    orig_group = FALSE
+    
+    groupings = "fake_grouping"
+    
+  }
+  
   # Kept x_col because of older version
   x_col <- x_axis
   new_col <- base::paste0(x_axis, "_ord")
 
-  # Create origiinal rows for preservation
+  # Create original rows for preservation
   dat <- dat %>%
     dplyr::mutate(orig_row = dplyr::row_number())
 
@@ -200,7 +221,7 @@ prep_ordinal <- function(dat,
       dplyr::arrange(.data[[x_col]], .by_group = TRUE)
   }
 
-  dat <-
+   dat <-
     dat %>%
     # temp_bol checks for experimental 0 and adjust ordinal
     dplyr::mutate(
@@ -212,8 +233,8 @@ prep_ordinal <- function(dat,
           dplyr::row_number()
         )
     ) %>%
-    dplyr::arrange(.data$orig_row) %>%
-    dplyr::select(-.data$orig_row, -.data$temp_bol)
+    dplyr::arrange("orig_row") %>%
+    dplyr::select(-"orig_row", -"temp_bol")
 
   # dat = semi_join(dat,
   #                 dat %>%
@@ -231,6 +252,16 @@ prep_ordinal <- function(dat,
 
   # arrange(orig_row) %>%
   # select(-orig_row)
+  
+  #delete fake grouping if it exists
+  if(!orig_group){
+    
+    dat<- 
+      dat %>%
+      ungroup() %>%
+      dplyr::select(-fake_grouping)
+    
+  }
 
   base::return(dat)
 }

@@ -2,6 +2,12 @@
 # User added
 **/desktop.ini
 discAUC.Rproj
+.Rprofile
+Icon[]
+.DS_Store
+CRAN-SUBMISSION
+CRAN-RELEASE
+.travis.yml
 
 # History files
 .Rhistory
@@ -50,4 +56,5 @@ docs/
 po/*~
 inst/doc
 AUC_prep_checks.R
-CRAN-RELEASE
+
+

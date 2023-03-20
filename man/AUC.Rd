@@ -26,7 +26,10 @@ AUC(
 
 \item{prob_disc}{Boolean for whether data are probability discounting}
 
-\item{max_x_axis}{Numeric; Maximum possible value in \code{x_axis}}
+\item{max_x_axis}{Numeric; Maximum possible value in \code{x_axis}. If left
+\code{NULL}, the function will determine and use the maximum value in 
+the \code{x_axis} variable. Useful for comparing AUC across non-standard
+data sets where the maximum \code{x_axis} value is not shared.}
 
 \item{amount}{Numeric; Maximum amount of indifference points. (A in discounting models.)}
 
@@ -35,12 +38,13 @@ as a character or vector of characters}
 
 \item{imp_zero}{Boolean for whether indifference points at \code{x_axis = 0} (e.g., delay = 0, odds against = 0, etc.) should be added to the data.}
 
-\item{type}{String for the type of AUC that should be calculated. Acceptable values are one of \code{c("linear","log","ordinal")}}
+\item{type}{String for the type of AUC that should be calculated. Acceptable 
+values are one of \code{c("linear","log","ordinal")}}
 
 \item{log_base}{If using logarithmic, what is the base of the log}
 }
 \value{
-Tibble with AUC by all grouping factors. If no grouping factor specified
+Tibble or with AUC by all grouping factors. If no grouping factor specified
 then a tibble with one AUC will be returned.
 }
 \description{

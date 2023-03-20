@@ -68,6 +68,7 @@ prep_AUC <- function(dat,
                      x_axis,
                      groupings = NULL,
                      prob_disc = FALSE) {
+  
   {  if (!tibble::is_tibble(dat)) {
     base::stop("dat must be a tibble")
   }
@@ -88,6 +89,23 @@ prep_AUC <- function(dat,
     base::stop("groupings must be a character or vector of characters for column names")
   }} # Checks
 
+  orig_group <- TRUE
+  
+  #Clear no visibile binding note
+  fake_grouping <- NULL
+  
+  #Handling no grouping factor
+  if(is.null(groupings)){
+    
+    dat <- dat %>%
+      dplyr::mutate(fake_grouping = 1)
+    
+    orig_group = FALSE
+    
+    groupings = "fake_grouping"
+    
+  }
+  
   x_col <- x_axis
   new_col <- base::paste0(x_axis, "_against")
 
@@ -110,5 +128,15 @@ prep_AUC <- function(dat,
       .by_group = TRUE
     )
 
+  #delete fake grouping if it exists
+  if(!orig_group){
+    
+    dat<- 
+      dat %>%
+      ungroup() %>%
+      dplyr::select(-fake_grouping)
+    
+  }
+  
   base::return(dat)
 }

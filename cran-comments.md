@@ -1,3 +1,11 @@
+## Version update
+
+-   Increment to Version 1.0.0
+    
+    -   Squashed bug.
+    
+    -   Accounted for changes in tidy expression evaluations.
+
 ## Resubmission
 
 -   Requested Changes for Manual Checks (part 2)
@@ -27,12 +35,12 @@
 
 ## Environment
 
--   Tested and built in x86_64, mingw32
--   Tested on Linux with Travis CI.
--   R version 4.1.0 (2021-05-18)
+-   Initial build in x86_64, mingw32
+-   Version 1.0.0 build in aarch64-apple-darwin20
+-   R version 4.2.1 (2022-06-23)
 
 ## R CMD check results
 
--   This is the first submission for this package.
--   With R CMD check there were no ERRORs, WARNINGs, or NOTEs.
--   Travis CI default returned no ERRORs, WARNINGs, or NOTEs.
+-   This is an updated for this package.
+-   There were no errors, warnings, or notes.
+-   No errors, warnings, or notes from check on win-builder.r-project.org

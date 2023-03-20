@@ -3,9 +3,6 @@
 
 # discAUC
 
-<!-- badges: start -->
-<!-- badges: end -->
-
 The goal of discAUC is to provide a solution to easily calculate AUC for
 delay discounting data. It includes logAUC and ordAUC as published in
 Borges et al.  (2016). It also includes a solution for 0 delays for
@@ -31,7 +28,7 @@ AUC(dat = examp_DD,
     indiff = "prop_indiff",
     amount = 1,
     groupings = c("subject","outcome"))
-#> # A tibble: 60 x 3
+#> # A tibble: 60 × 3
 #> # Groups:   subject [15]
 #>    subject outcome            AUC
 #>      <dbl> <chr>            <dbl>
@@ -45,5 +42,5 @@ AUC(dat = examp_DD,
 #>  8     -2  food          0.000278
 #>  9     -1  $100 Gain     1       
 #> 10     -1  alcohol       1       
-#> # ... with 50 more rows
+#> # … with 50 more rows
 ```

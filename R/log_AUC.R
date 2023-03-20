@@ -81,11 +81,12 @@ prep_log_AUC <- function(dat,
     base::unique()
 
   # For ease seperated out of single tidy function
-  log_vals <- dplyr::tibble(orig = x_vals) %>%
-    dplyr::arrange(.data$orig) %>%
+  log_vals <- 
+    dplyr::tibble(orig = x_vals) %>%
+    dplyr::arrange("orig") %>%
     dplyr::mutate(
-      log_val = base::log(.data$orig, log_base),
-      log_diff = .data$log_val - dplyr::lag(.data$log_val)
+      log_val = base::log(.data[["orig"]], log_base),
+      log_diff = .data[["log_val"]] - dplyr::lag(.data[["log_val"]])
     )
 
   # It is possible that other forms will be implemented in the future,
@@ -94,9 +95,12 @@ prep_log_AUC <- function(dat,
   if (type == "adjust") {
 
     # Find mean differences between x_axis
-    mean_diff <- log_vals %>%
-      dplyr::filter(!base::is.na(.data$log_diff) & !base::is.infinite(.data$log_diff)) %>%
-      dplyr::pull(.data$log_diff) %>%
+    mean_diff <-
+      log_vals %>%
+      dplyr::filter(!base::is.na(.data[["log_diff"]]) & 
+                      !base::is.infinite(.data[["log_diff"]])
+                    ) %>%
+      dplyr::pull(.data[["log_diff"]]) %>%
       base::mean()
   } else if (type == "corr") {
     mean_diff <- 1
@@ -110,9 +114,10 @@ prep_log_AUC <- function(dat,
 
   # The offset exists to eliminate negative x_axis values for clean log values
   if (dec_offset) {
-    log_offset <- log_vals %>%
-      dplyr::filter(!base::is.infinite(.data$log_val)) %>%
-      dplyr::pull(.data$log_val) %>%
+    log_offset <- 
+      log_vals %>%
+      dplyr::filter(!base::is.infinite(.data[["log_val"]])) %>%
+      dplyr::pull(.data[["log_val"]]) %>%
       base::min()
 
     if (log_offset < 0) {
@@ -125,16 +130,20 @@ prep_log_AUC <- function(dat,
   }
 
   if (type == "adjust") {
-    log_vals <- log_vals %>%
-      dplyr::mutate(log_val_adj = .data$log_val + log_offset + mean_diff)
+    log_vals <- 
+      log_vals %>%
+      dplyr::mutate(log_val_adj = .data[["log_val"]] + 
+                      log_offset + mean_diff)
   } else if (type == "corr") {
-    log_vals <- log_vals %>%
-      dplyr::mutate(log_val_adj = base::log(.data$orig + correction,
+    log_vals <- 
+      log_vals %>%
+      dplyr::mutate(log_val_adj = base::log(.data[["orig"]] + correction,
         base = log_base
       ))
   } else if (type == "IHS") {
-    log_vals <- log_vals %>%
-      dplyr::mutate(log_val_adj = base::asinh(.data$orig))
+    log_vals <- 
+      log_vals %>%
+      dplyr::mutate(log_val_adj = base::asinh(.data[["orig"]]))
   }
 
   if (inc_zero) {
@@ -145,7 +154,9 @@ prep_log_AUC <- function(dat,
 
   log_vals <-
     log_vals %>%
-    dplyr::select(.data$orig, .data$log_val_adj) %>%
+    dplyr::select(
+      dplyr::all_of(
+        base::c("orig","log_val_adj"))) %>%
     dplyr::rename(
       {{ x_axis }} := "orig",
       {{ new_col }} := "log_val_adj"

@@ -4,15 +4,19 @@
 #' @param indiff Indifference points Variable in \code{dat}
 #' @param x_axis Delays/probabilities/social distance variable in \code{dat}
 #' @param prob_disc Boolean for whether data are probability discounting
-#' @param max_x_axis Numeric; Maximum possible value in \code{x_axis}
+#' @param max_x_axis Numeric; Maximum possible value in \code{x_axis}. If left
+#' \code{NULL}, the function will determine and use the maximum value in 
+#' the \code{x_axis} variable. Useful for comparing AUC across non-standard
+#' data sets where the maximum \code{x_axis} value is not shared.
 #' @param amount Numeric; Maximum amount of indifference points. (A in discounting models.)
 #' @param groupings Variables for grouping (e.g., subject, experimental group)
 #' as a character or vector of characters
 #' @param imp_zero Boolean for whether indifference points at \code{x_axis = 0} (e.g., delay = 0, odds against = 0, etc.) should be added to the data.
-#' @param type String for the type of AUC that should be calculated. Acceptable values are one of \code{c("linear","log","ordinal")}
+#' @param type String for the type of AUC that should be calculated. Acceptable 
+#' values are one of \code{c("linear","log","ordinal")}
 #' @param log_base If using logarithmic, what is the base of the log
 #'
-#' @return Tibble with AUC by all grouping factors. If no grouping factor specified
+#' @return Tibble or with AUC by all grouping factors. If no grouping factor specified
 #' then a tibble with one AUC will be returned.
 #' @export
 #' @import dplyr
@@ -85,6 +89,22 @@ AUC <- function(dat,
     rm(type_options)
   } # Checks
 
+  #Start
+  orig_group = TRUE
+  fake_grouping = NULL
+    
+  #Handling no grouping factor
+  if(is.null(groupings)){
+    
+    dat <- dat %>%
+      dplyr::mutate(fake_grouping = 1)
+    
+    orig_group = FALSE
+    
+    groupings = "fake_grouping"
+    
+  }
+  
   # Decided to have a new name to track what was original and
   # whatever the monster of the end column name is
   new_x_axis <- x_axis
@@ -163,6 +183,7 @@ AUC <- function(dat,
       base::max()
   }
 
+  #Trapezoids are created from first to last
   dat <- dat %>%
     dplyr::mutate(
       trap =
@@ -174,5 +195,15 @@ AUC <- function(dat,
   out <- dat %>%
     dplyr::summarize(AUC = base::sum(.data$trap, na.rm = TRUE))
 
+  #delete fake grouping if it exists
+  if(!orig_group){
+    
+    out<- 
+      out %>%
+      ungroup() %>%
+      dplyr::select(-fake_grouping)
+    
+  }
+  
   base::return(out)
 }
