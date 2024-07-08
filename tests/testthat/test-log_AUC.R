@@ -53,7 +53,7 @@ test_that("Adjusting works", {
     abs(log(1 / 7, base = base)))
 })
 
-test_that("IHS works", {
+test_that("IHS with no theta works", {
   test_dat <- tibble(
     delay = c(0, 1 / 7, 1, 2, 4, 26, 52),
     indiff = c(100, 95, 75, 50, 20, 5, 1)
@@ -75,5 +75,57 @@ test_that("IHS works", {
   expect_equal(
     log_delays[2],
     asinh(1 / 7)
+  )
+})
+
+test_that("IHS with theta equals 1 works", {
+  test_dat <- tibble(
+    delay = c(0, 1 / 7, 1, 2, 4, 26, 52),
+    indiff = c(100, 95, 75, 50, 20, 5, 1)
+  )
+  
+  base <- 10
+  
+  log_delays <- prep_log_AUC(
+    dat = test_dat,
+    x_axis = "delay",
+    log_base = base,
+    dec_offset = TRUE,
+    type = "IHS",
+    ihs_theta = 1
+  ) %>%
+    pull(log_delay)
+  
+  expect_equal(log_delays[1], 0)
+  
+  expect_equal(
+    log_delays[2],
+    asinh(1 / 7)
+  )
+})
+
+test_that("IHS with theta equals 2 works", {
+  test_dat <- tibble(
+    delay = c(0, 1 / 7, 1, 2, 4, 26, 52),
+    indiff = c(100, 95, 75, 50, 20, 5, 1)
+  )
+  
+  base <- 10
+  
+  log_delays <- prep_log_AUC(
+    dat = test_dat,
+    x_axis = "delay",
+    log_base = base,
+    dec_offset = TRUE,
+    type = "IHS",
+    ihs_theta = 2
+  ) %>%
+    pull(log_delay)
+  
+  expect_equal(log_delays[1], 0)
+  
+  expect_equal(
+    log_delays[2],
+    log(2 * 1/7 + sqrt(2^2 * (1/7) ^ 2 + 1))
   )
 })

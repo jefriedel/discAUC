@@ -10,6 +10,7 @@ prep_log_AUC(
   log_base = 2,
   type = "adjust",
   correction = 1,
+  ihs_theta = 1,
   dec_offset = TRUE
 )
 }
@@ -31,6 +32,9 @@ does not require corrections}
 
 \item{correction}{If \code{type == "corr"} this value is what is added to the
 x_axis prior to taking the log values.}
+
+\item{ihs_theta}{If \code{type == "IHS"} this value is used to adjust the
+standard IHS distribution to a preferred distribution.}
 
 \item{dec_offset}{If \code{TRUE}, offsets the log x_axis values if the lowest
 non-zero x_axis value is a decimal. This calculation is preferred because if

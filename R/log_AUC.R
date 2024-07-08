@@ -22,6 +22,8 @@
 #' does not require corrections
 #' @param correction If \code{type == "corr"} this value is what is added to the
 #' x_axis prior to taking the log values.
+#' @param ihs_theta If \code{type == "IHS"} this value is used to adjust the
+#' standard IHS distribution to a preferred distribution.
 #' @param dec_offset If \code{TRUE}, offsets the log x_axis values if the lowest
 #' non-zero x_axis value is a decimal. This calculation is preferred because if
 #' x_axis values are negative then the log values will be negative. The negative
@@ -51,6 +53,7 @@ prep_log_AUC <- function(dat,
                          log_base = 2,
                          type = "adjust",
                          correction = 1,
+                         ihs_theta = 1,
                          dec_offset = TRUE) {
   {    if (!tibble::is_tibble(dat)) {
     stop("dat must be a tibble")
@@ -80,7 +83,7 @@ prep_log_AUC <- function(dat,
     dplyr::pull({{ x_axis }}) %>%
     base::unique()
 
-  # For ease seperated out of single tidy function
+  # For ease separated out of single tidy function
   log_vals <- 
     dplyr::tibble(orig = x_vals) %>%
     dplyr::arrange("orig") %>%
@@ -143,7 +146,13 @@ prep_log_AUC <- function(dat,
   } else if (type == "IHS") {
     log_vals <- 
       log_vals %>%
-      dplyr::mutate(log_val_adj = base::asinh(.data[["orig"]]))
+      dplyr::mutate(
+        log_val_adj = log(ihs_theta * .data[["orig"]] + 
+                            sqrt((ihs_theta ^ 2) * (.data[["orig"]] ^ 2) + 1)),
+        #v1.0.0_ihs = base::asinh(.data[["orig"]]) #Was IHS from version 1.0.0
+        #If theta is set to 1, as is the default in the function then the new
+        #IHS values in the update will equal the old
+        )
   }
 
   if (inc_zero) {
