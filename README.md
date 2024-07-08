@@ -42,5 +42,5 @@ AUC(dat = examp_DD,
 #>  8     -2  food          0.000278
 #>  9     -1  $100 Gain     1       
 #> 10     -1  alcohol       1       
-#> # … with 50 more rows
+#> # ℹ 50 more rows
 ```

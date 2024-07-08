@@ -1,4 +1,4 @@
-# Version 1.0.1
+# Version 1.0.2
 
 Addressed an error in how the IHS AUC was calculated. A correction factor to scale the IHS values towards a desired distribution (e.g., make it more like a logarithmic distribution) was previously not included. The correction should not affect prior uses of the package.
 

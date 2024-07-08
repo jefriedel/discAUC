@@ -1,3 +1,9 @@
+## Version Update
+-   Increment to 1.0.2
+
+    -Corrected oversight in calculation of IHS distribution of AUC to be,
+    dependent code should be unaffected
+
 ## Version update
 
 -   Increment to Version 1.0.0
