@@ -31,3 +31,5 @@ Imports: dplyr, tibble, rlang, glue
 Depends: 
     R (>= 4.2)
 VignetteBuilder: knitr
+URL: https://github.com/jefriedel/discAUC
+BugReports: https://github.com/jefriedel/discAUC/issues
