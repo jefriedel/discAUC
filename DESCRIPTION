@@ -13,7 +13,7 @@ Description: Area under the curve (AUC; Myerson et al., 2001) <doi:10.1901/jeab.
   The package can calculate all three versions of AUC [and includes a new version: IHS(AUC)],
   impute indifference points when x = 0, calculate ordinal AUC in the case of Halton
   sampling of x-values, and account for probability discounting AUC.
-Version: 1.0.2
+Version: 1.0.2.9000
 Authors@R: person(given = "Jonathan E.",
   family = "Friedel",
   email = "jfriedel@georgiasouthern.edu",
