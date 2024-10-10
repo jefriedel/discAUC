@@ -1,6 +1,7 @@
 ## Version Update
 -   Increment to 1.0.2
-
+    
+    -Correction for build error from me not approving the CRAN build.
     -Corrected oversight in calculation of IHS distribution of AUC to be,
     dependent code should be unaffected
 

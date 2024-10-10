@@ -1,4 +1,4 @@
-# discAUC 1.1.0
+# discAUC (development version)
 
 # Version 1.0.2
 
