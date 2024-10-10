@@ -16,3 +16,4 @@ News.md
 Icon
 ^CRAN-SUBMISSION$
 ^\.github$
+^revdep$
