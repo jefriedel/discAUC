@@ -40,3 +40,6 @@ AUC(dat = examp_DD,
     groupings = c("subject","outcome"))
 ```
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/jefriedel/discAUC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jefriedel/discAUC/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->

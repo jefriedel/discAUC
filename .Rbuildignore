@@ -15,3 +15,4 @@ News.md
 ^CRAN-RELEASE$
 Icon
 ^CRAN-SUBMISSION$
+^\.github$
