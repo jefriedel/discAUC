@@ -19,6 +19,8 @@ The goal of discAUC is to provide a solution to easily calculate AUC for delay
 discounting data. It includes logAUC and ordAUC as published in Borges et al. 
 (2016). It also includes a solution for 0 delays for logAUC.
 
+Please cite this package using: Friedel, J. E., Treem, K. M. A., Frye, C. C. J., Salem, S. K., Westberry-Nix, M. B., & Devonshire, L. (2025). Clarifications for calculating area under the curve for discounting data: A primer and technical report. *Journal of the Experimental Analysis of Behavior*, *124*(1), e70041. [https://doi.org/10.1002/jeab.70041](https://doi.org/10.1002/jeab.70041)
+
 ## Installation
 
 You can install the released version of discAUC from [CRAN](https://CRAN.R-project.org) with:

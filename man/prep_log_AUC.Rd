@@ -8,7 +8,7 @@ prep_log_AUC(
   dat,
   x_axis,
   log_base = 2,
-  type = "adjust",
+  type = "shift",
   correction = 1,
   ihs_theta = 1,
   dec_offset = TRUE
@@ -23,8 +23,8 @@ zero values on the \code{x_axis} will need to be included.}
 \item{log_base}{Base of the logarithm}
 
 \item{type}{Type of correction to handle 0 values on x_axis. Acceptable values
-are "corr"., "adjust", and "IHS". "Corr" adds a set value to each x_axis
-value and then takes the log of those values. "Adjust" implements increasing
+are "corr"., "adjust", "shift" and "IHS". "Corr" adds a set value to each x_axis
+value and then takes the log of those values. "Adjust" and "shift" are synonyms and implement increasing
 the x_axis values by the average difference between the log values on the x_axis.
 "IHS" calculates the inverse hyperbolic sine, which is different than the logarithm
 but is highly correlated with log transformed values. The IHS transformation
@@ -51,7 +51,7 @@ Calculate log x_axis values for AUClog
 \section{Correction types for handling zero x-axis values}{
 
 "Corr" adds a set correction value to each \code{x_axis}
-value and then takes the log of those values. "Adjust" implements increasing
+value and then takes the log of those values. "Shift" and "adjust" implement increasing
 the \code{x_axis} values by the average difference between the log values on the \code{x_axis}.
 "IHS" calculates the inverse hyperbolic sine for the \code{x_axis},
 which is different than the logarithm

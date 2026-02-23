@@ -21,7 +21,7 @@ test_that("Correction works", {
 })
 
 
-test_that("Adjusting works", {
+test_that("Shift and ajust works", {
   test_dat <- tibble(
     delay = c(0, 1 / 7, 1, 2, 4, 26, 52),
     indiff = c(100, 95, 75, 50, 20, 5, 1)
@@ -51,6 +51,37 @@ test_that("Adjusting works", {
   expect_equal(log_delays[2], log(1 / 7, base = base) +
     adjustment_correction +
     abs(log(1 / 7, base = base)))
+})
+
+test_that("Adjust and Shift are the same", {
+  test_dat <- tibble::tibble(
+    delay = c(0, 1 / 7, 1, 2, 4, 26, 52),
+    indiff = c(100, 95, 75, 50, 20, 5, 1)
+  )
+  
+  
+  base <- 10
+  
+  adjust_delays <- prep_log_AUC(
+    dat = test_dat,
+    x_axis = "delay",
+    log_base = base,
+    dec_offset = TRUE,
+    type = "adjust"
+  ) %>%
+    pull(log_delay)
+  
+  shift_delays <- prep_log_AUC(
+    dat = test_dat,
+    x_axis = "delay",
+    log_base = base,
+    dec_offset = TRUE,
+    type = "shift"
+  ) %>%
+    pull(log_delay)
+  
+  expect_equal(adjust_delays, shift_delays)
+  
 })
 
 test_that("IHS with no theta works", {

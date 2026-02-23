@@ -2,7 +2,7 @@
 #'
 #' @section Correction types for handling zero x-axis values:
 #' "Corr" adds a set correction value to each \code{x_axis}
-#' value and then takes the log of those values. "Adjust" implements increasing
+#' value and then takes the log of those values. "Shift" and "adjust" implement increasing
 #' the \code{x_axis} values by the average difference between the log values on the \code{x_axis}.
 #' "IHS" calculates the inverse hyperbolic sine for the \code{x_axis},
 #' which is different than the logarithm
@@ -14,8 +14,8 @@
 #' @param x_axis Delays/probabilities/social distance variable
 #' @param log_base Base of the logarithm
 #' @param type Type of correction to handle 0 values on x_axis. Acceptable values
-#' are "corr"., "adjust", and "IHS". "Corr" adds a set value to each x_axis
-#' value and then takes the log of those values. "Adjust" implements increasing
+#' are "corr"., "adjust", "shift" and "IHS". "Corr" adds a set value to each x_axis
+#' value and then takes the log of those values. "Adjust" and "shift" are synonyms and implement increasing
 #' the x_axis values by the average difference between the log values on the x_axis.
 #' "IHS" calculates the inverse hyperbolic sine, which is different than the logarithm
 #' but is highly correlated with log transformed values. The IHS transformation
@@ -51,78 +51,78 @@
 prep_log_AUC <- function(dat,
                          x_axis,
                          log_base = 2,
-                         type = "adjust",
+                         type = "shift",
                          correction = 1,
                          ihs_theta = 1,
                          dec_offset = TRUE) {
   {    if (!tibble::is_tibble(dat)) {
     stop("dat must be a tibble")
   }
-
-  if (!base::is.character(x_axis)) {
-    base::stop("x_axis must be a string indicating the x-axis variable")
-  }
-
-  if (!base::is.numeric(log_base) | (log_base <= 0)) {
-    base::stop("log_base must be a number greater than 0")
-  }
-
-  if (!(type %in% (c("corr", "adjust", "IHS")))) {
-    base::stop("type must be a string of either \"corr\", \"adjust\", or \"IHS\".")
-  }
-
-  if (!base::is.numeric(correction) | (correction <= 0)) {
-    base::stop("correction must be a number greater than 0")
-  }
-
-  if (!base::is.logical(dec_offset)) {
-    base::stop("dec_offset must be either TRUE or FALSE")
-  }  } # Checks
-
+    
+    if (!base::is.character(x_axis)) {
+      base::stop("x_axis must be a string indicating the x-axis variable")
+    }
+    
+    if (!base::is.numeric(log_base) | (log_base <= 0)) {
+      base::stop("log_base must be a number greater than 0")
+    }
+    
+    if (!(type %in% (c("corr", "adjust","shift", "IHS")))) {
+      base::stop("type must be a string of either \"corr\", \"shift\", \"adjust\", or \"IHS\".")
+    }
+    
+    if (!base::is.numeric(correction) | (correction <= 0)) {
+      base::stop("correction must be a number greater than 0")
+    }
+    
+    if (!base::is.logical(dec_offset)) {
+      base::stop("dec_offset must be either TRUE or FALSE")
+    }  } # Checks
+  
   x_vals <- dat %>%
     dplyr::pull({{ x_axis }}) %>%
     base::unique()
-
+  
   # For ease separated out of single tidy function
-  log_vals <- 
+  log_vals <-
     dplyr::tibble(orig = x_vals) %>%
     dplyr::arrange("orig") %>%
     dplyr::mutate(
       log_val = base::log(.data[["orig"]], log_base),
       log_diff = .data[["log_val"]] - dplyr::lag(.data[["log_val"]])
     )
-
+  
   # It is possible that other forms will be implemented in the future,
   # so keeping the type variable and just setting it
-
-  if (type == "adjust") {
-
+  
+  if (type == "adjust" | type == "shift") {
+    
     # Find mean differences between x_axis
     mean_diff <-
       log_vals %>%
-      dplyr::filter(!base::is.na(.data[["log_diff"]]) & 
+      dplyr::filter(!base::is.na(.data[["log_diff"]]) &
                       !base::is.infinite(.data[["log_diff"]])
-                    ) %>%
+      ) %>%
       dplyr::pull(.data[["log_diff"]]) %>%
       base::mean()
   } else if (type == "corr") {
     mean_diff <- 1
   }
-
+  
   inc_zero <- base::min(x_vals) == 0
-
+  
   if (!inc_zero) {
     mean_diff <- 0
   }
-
+  
   # The offset exists to eliminate negative x_axis values for clean log values
   if (dec_offset) {
-    log_offset <- 
+    log_offset <-
       log_vals %>%
       dplyr::filter(!base::is.infinite(.data[["log_val"]])) %>%
       dplyr::pull(.data[["log_val"]]) %>%
       base::min()
-
+    
     if (log_offset < 0) {
       log_offset <- base::abs(log_offset)
     } else {
@@ -131,36 +131,36 @@ prep_log_AUC <- function(dat,
   } else {
     log_offset <- 0
   }
-
-  if (type == "adjust") {
-    log_vals <- 
+  
+  if (type == "adjust" | type == "shift") {
+    log_vals <-
       log_vals %>%
-      dplyr::mutate(log_val_adj = .data[["log_val"]] + 
+      dplyr::mutate(log_val_adj = .data[["log_val"]] +
                       log_offset + mean_diff)
   } else if (type == "corr") {
-    log_vals <- 
+    log_vals <-
       log_vals %>%
       dplyr::mutate(log_val_adj = base::log(.data[["orig"]] + correction,
-        base = log_base
+                                            base = log_base
       ))
   } else if (type == "IHS") {
-    log_vals <- 
+    log_vals <-
       log_vals %>%
       dplyr::mutate(
-        log_val_adj = log(ihs_theta * .data[["orig"]] + 
+        log_val_adj = log(ihs_theta * .data[["orig"]] +
                             sqrt((ihs_theta ^ 2) * (.data[["orig"]] ^ 2) + 1)),
         #v1.0.0_ihs = base::asinh(.data[["orig"]]) #Was IHS from version 1.0.0
         #If theta is set to 1, as is the default in the function then the new
         #IHS values in the update will equal the old
-        )
+      )
   }
-
+  
   if (inc_zero) {
     log_vals[1, "log_val_adj"] <- 0
   }
-
+  
   new_col <- glue::glue("log_{x_axis}")
-
+  
   log_vals <-
     log_vals %>%
     dplyr::select(
@@ -170,12 +170,12 @@ prep_log_AUC <- function(dat,
       {{ x_axis }} := "orig",
       {{ new_col }} := "log_val_adj"
     )
-
+  
   dat <- dplyr::left_join(dat,
-    log_vals,
-    by = x_axis
+                          log_vals,
+                          by = x_axis
   )
-
+  
   base::return(dat)
 }
 
