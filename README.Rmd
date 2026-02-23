@@ -15,7 +15,9 @@ knitr::opts_chunk$set(
 
 # discAUC
 
-The goal of discAUC is to provide a solution to easily calculate AUC for delay
+[![R-hub](https://github.com/jefriedel/discAUC/actions/workflows/rhub.yaml/badge.svg)](https://github.com/jefriedel/discAUC/actions/workflows/rhub.yaml)
+
+The goal of **discAUC** is to provide a solution to easily calculate AUC for delay
 discounting data. It includes logAUC and ordAUC as published in Borges et al. 
 (2016). It also includes a solution for 0 delays for logAUC.
 
