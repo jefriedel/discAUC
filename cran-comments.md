@@ -1,4 +1,10 @@
 ## Version Update
+-  Increment to 1.1.0
+    
+    -Modified function to include synonym for a function parameter (log_AUC). Dependent code will not be affected.
+    -Rebuilt for current version of R.
+
+## Version Update
 -   Increment to 1.0.3
     
     -Correction for build error from me not approving the CRAN build.
