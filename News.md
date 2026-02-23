@@ -1,3 +1,7 @@
+# discAUC 1.1.0
+
+Included "shift" as synonym for "adjust" in AUClog. Rebuilt for current R version.
+
 # discAUC 1.0.3
 
 # Version 1.0.2
